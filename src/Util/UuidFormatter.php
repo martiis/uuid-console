@@ -59,14 +59,16 @@ class UuidFormatter
     public function write(Table $table, UuidInterface $uuid)
     {
         $encodeRows = array(
-            array('encode:', 'STR:', (string) $uuid),
-            array('',        'INT:', (string) $uuid->getInteger()),
+            array('encode:', 'STR:',     (string) $uuid),
+            array('',        'STR-HEX:', (string) $uuid->getHex()),
+            array('',        'INT:',     (string) $uuid->getInteger()),
         );
 
         if ($uuid->getVersion() === 1 && class_exists('Ramsey\Uuid\Codec\OrderedTimeCodec')) {
             $factory = clone Uuid::getFactory();
             $codec = new OrderedTimeCodec($factory->getUuidBuilder());
             $encodeRows[] = array('', 'ORD:', Uuid::fromBytes($codec->encodeBinary($uuid)));
+            $encodeRows[] = array('', 'ORD-HEX:', Uuid::fromBytes($codec->encodeBinary($uuid))->getHex());
         }
 
         $table->addRows($encodeRows);
