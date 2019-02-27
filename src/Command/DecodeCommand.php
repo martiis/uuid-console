@@ -60,20 +60,19 @@ class DecodeCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!Uuid::isValid($input->getArgument('uuid'))) {
-            throw new Exception('Invalid UUID (' . $input->getArgument('uuid') . ')');
-        }
-
-        $uuid = Uuid::fromString($input->getArgument('uuid'));
-
         if ($input->getOption('ordered-time')) {
             if (!class_exists('Ramsey\Uuid\Codec\OrderedTimeCodec')) {
                 throw new Exception('To use ordered-time option requires ramsey/uuid=^3.5');
             }
-
+            
             $factory = clone Uuid::getFactory();
             $codec = new OrderedTimeCodec($factory->getUuidBuilder());
-            $uuid = $codec->decodeBytes($uuid->getBytes());
+            $uuid = $codec->decodeBytes(Uuid::fromString($input->getArgument('uuid'))->getBytes());
+        } else {
+            if (!Uuid::isValid($input->getArgument('uuid'))) {
+                throw new Exception('Invalid UUID (' . $input->getArgument('uuid') . ')');
+            }
+            $uuid = Uuid::fromString($input->getArgument('uuid'));
         }
 
         $table = $this->createTable($output);
